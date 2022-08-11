@@ -338,7 +338,7 @@ public class GameView extends View {
             while (player == exit) {
                 vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                 vibrator.vibrate(1000);
-                
+
                 createMaze();
                 newMaze++;
             }
