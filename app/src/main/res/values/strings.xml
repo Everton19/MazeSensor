@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">UCS</string>
+    <string name="textview">TextView</string>
+    <string name="VoceGanhou" />
+    <string name="Parabéns" />
+    <string name="VocêVenceu" />
+    <string name="Venceu" />
+</resources>
