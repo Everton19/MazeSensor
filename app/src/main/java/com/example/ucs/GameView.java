@@ -32,14 +32,12 @@ public class GameView extends View {
     private void getSystemService(String sensorService) {
     }
 
-
     public void goToAnotherActivity(View view) {
         Intent intent = new Intent(getContext(), FinalActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         getContext().startActivity(intent);
     }
-
 
     Vibrator vibrator;
 
@@ -51,15 +49,10 @@ public class GameView extends View {
     private float cellSize, hMargin, vMargin;
     private Paint wallPaint, playerPaint, exitPaint;
     private Random random;
-    private static int newMaze;
+    private static int newMaze = 0;
 
-    //    private Bitmap playerAvatar;   -> Dá pra por uma imagem poggerssss //
-    private static int avatarX = 450;
-    private static int avatarY = 450;
-    private static int scale = 350;
-    
 
-    // Video do segundo cara //
+    //  Funcionamento do Sensor //
     private SensorManager sensorManager;
     private Sensor sensor;
     private SensorEventListener sensorEventListener = new SensorEventListener() {
@@ -86,35 +79,24 @@ public class GameView extends View {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) {
-
         }
     };
 
-
-    // register
-    public void sensor_register(){
+    // Registra
+    public void sensorRegister(){
         sensorManager.registerListener(sensorEventListener, sensor, sensorManager.SENSOR_DELAY_UI);
     }
 
-    // unregister
+    // Não Registra
     public void sensor_unregister() {
         sensorManager.unregisterListener(sensorEventListener);
     }
 
 
-    public static boolean running = false;
-
     public GameView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-//        if (!running) {
-//            playerAvatar = BitmapFactory.decodeResource(getResources(), R.drawable.avatar);
-//            playerAvatar = Bitmap.createScaledBitmap(playerAvatar, avatarY - scale, avatarX - scale, running);
-//        }
-
-
         final MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.zelda);
-
 
         wallPaint = new Paint();
         wallPaint.setColor(Color.BLACK);
@@ -128,15 +110,12 @@ public class GameView extends View {
 
         random = new Random();
 
-
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 
         assert sensorManager != null;
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 
-        sensor_register();
-
-
+        sensorRegister();
 
         createMaze();
         mediaPlayer.start();
@@ -194,6 +173,11 @@ public class GameView extends View {
         }
     }
 
+    public void resetMaze(){
+        player = cells[0][0];
+        createMaze();
+    }
+
     private void createMaze() {
         Stack<Cell> stack = new Stack<>();
         Cell current, next;
@@ -226,7 +210,7 @@ public class GameView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawColor(Color.GREEN);
+        canvas.drawColor(Color.rgb(252, 182, 193)); // Rosa Pastel
 
         int width = getWidth();
         int height = getHeight();
@@ -283,14 +267,6 @@ public class GameView extends View {
 
         float margin = cellSize / 10;
 
-//        canvas.drawBitmap(
-//                playerAvatar,
-//                player.col * cellSize * margin,
-//                player.row * cellSize * margin,
-//                playerPaint
-//        );
-
-
         canvas.drawRect(
                 player.col * cellSize + margin,
                 player.row * cellSize + margin,
@@ -332,18 +308,23 @@ public class GameView extends View {
     }
 
     private void checkExit(){
-
-
         if (newMaze < 3) {
-            while (player == exit) {
+            if (player == exit) {
                 vibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
                 vibrator.vibrate(1000);
 
                 createMaze();
                 newMaze++;
             }
-        } else
+        } else if (newMaze == 3){
             goToAnotherActivity(this);
+
+            final MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.sonic);
+            mediaPlayer.start();
+
+//            android.os.Process.killProcess(android.os.Process.myPid());
+//            System.exit(1);
+        }
 
     }
 
@@ -367,7 +348,6 @@ public class GameView extends View {
             float absDy = Math.abs(dy);
 
             if (absDx > cellSize || absDy > cellSize) {
-
                 if (absDx > absDy) {
                     // move in x-direction
                     if (dx > 0)
@@ -385,7 +365,8 @@ public class GameView extends View {
             }
 
             return true;
-        }
+        } else
+            resetMaze();
 
         return super.onTouchEvent(event);
     }
